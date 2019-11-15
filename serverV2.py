@@ -25,7 +25,7 @@ class ThreadServer(object):
         self.port = port
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.socket((self.host,self.port))
+        self.socket.bind((self.host,self.port))
 
     def listen(self,queue_size):
         self.socket.listen(queue_size)
@@ -37,7 +37,7 @@ class ThreadServer(object):
                 continue
             clients[client] = user
             print(f'Accepted new connection from {address[0]} : {address[1]}')
-            client.settimeout(60)
+            client.settimeout(60*5)
             threading.Thread(target=self.listen_to_client,args=(client,address)).start()
 
     def listen_to_client(self, client, address):
@@ -54,7 +54,7 @@ class ThreadServer(object):
                         if client != other_clients:
                             other_clients.send(user['header']+user['data']+message['header']+message['data'])
                 else:
-                    raise error('Client Disconnected')
+                    raise Exception('Client Disconnected')
             except:
                 del clients[client]
                 connected_sockets.remove(client)
